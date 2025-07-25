@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSearch - Simple Code Search & Visualization</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/github-dark.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cal+Sans:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <span class="logo-icon">🔍</span>
+                    CodeSearch
+                </h1>
+                <div class="search-bar">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Search code, functions, classes..."
+                        hx-get="/search"
+                        hx-target="#search-results"
+                        hx-trigger="keyup changed delay:300ms"
+                        hx-indicator="#loading"
+                        autocomplete="off"
+                    >
+                    <div id="loading" class="htmx-indicator">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>Repositories</h3>
+                    <div id="repo-list" hx-get="/repositories" hx-trigger="load">
+                        <div class="loading-placeholder">Loading repositories...</div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>File Types</h3>
+                    <div class="filter-group">
+                        <label class="filter-item">
+                            <input type="checkbox" name="filetype" value="js" checked>
+                            <span>JavaScript (.js)</span>
+                        </label>
+                        <label class="filter-item">
+                            <input type="checkbox" name="filetype" value="py" checked>
+                            <span>Python (.py)</span>
+                        </label>
+                        <label class="filter-item">
+                            <input type="checkbox" name="filetype" value="ts" checked>
+                            <span>TypeScript (.ts)</span>
+                        </label>
+                        <label class="filter-item">
+                            <input type="checkbox" name="filetype" value="html" checked>
+                            <span>HTML (.html)</span>
+                        </label>
+                        <label class="filter-item">
+                            <input type="checkbox" name="filetype" value="css" checked>
+                            <span>CSS (.css)</span>
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="content">
+                <div id="search-results" class="search-results">
+                    <div class="welcome-message">
+                        <div class="welcome-icon">🚀</div>
+                        <h2>Welcome to CodeSearch</h2>
+                        <p>Start typing to search across your codebase. Find functions, classes, variables, and more with lightning-fast results.</p>
+                        <div class="search-tips">
+                            <h4>Search Tips:</h4>
+                            <ul>
+                                <li>Use <code>function:name</code> to search for specific functions</li>
+                                <li>Use <code>class:name</code> to find class definitions</li>
+                                <li>Use <code>file:name</code> to search by filename</li>
+                                <li>Use quotes for exact matches: <code>"exact phrase"</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
