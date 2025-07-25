@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JennyCloud (Note Board)</title>
+    <style>
+      :root {
+    --background: #f4f4f5;
+    --surface: #ffffff;
+    --primary: #6d28d9;
+    --on-surface: #111827;
+    --on-surface-secondary: #6b7280;
+    --border-color: #e5e7eb;
+    --shadow-color: rgba(0, 0, 0, 0.05);
+
+    /* Note Colors */
+    --note-color-default: var(--surface);
+    --note-color-red: #fee2e2;
+    --note-color-yellow: #fef3c7;
+    --note-color-green: #dcfce7;
+    --note-color-blue: #dbeafe;
+    --note-color-purple: #f3e8ff;
+}
+
+[data-theme="dark"] {
+    --background: #1a1a1a;
+    --surface: #2a2a2a;
+    --primary: #bb86fc;
+    --on-surface: #e0e0e0;
+    --on-surface-secondary: #a0a0a0;
+    --border-color: #3a3a3a;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+
+    /* Note Colors */
+    --note-color-default: var(--surface);
+    --note-color-red: #4a2424;
+    --note-color-yellow: #4a4324;
+    --note-color-green: #244a2b;
+    --note-color-blue: #24354a;
+    --note-color-purple: #3f244a;
+}
+
+html {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--background);
+    color: var(--on-surface);
+}
+
+body {
+    margin: 0;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    position: sticky;
+    top: 0;
+    background-color: var(--background);
+    z-index: 10;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.main-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nav-tab {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: transparent;
+    color: var(--on-surface-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-tab:hover {
+    background-color: var(--surface);
+    color: var(--on-surface);
+}
+
+.nav-tab.active {
+    background-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+}
+[data-theme="dark"] .nav-tab.active {
+    color: #000;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+button {
+    background-color: transparent;
+    color: var(--on-surface);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+button:hover {
+    background-color: var(--surface);
+    border-color: var(--on-surface-secondary);
+}
+
+.danger-btn {
+    background-color: #e53935;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+.danger-btn:hover {
+    background-color: #c62828;
+}
+
+#add-note-btn {
+    background-color: var(--primary);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+[data-theme="dark"] #add-note-btn {
+    color: #000;
+}
+#add-note-btn:hover {
+    opacity: 0.9;
+    background-color: var(--primary); /* Keep background on hover */
+}
+
+.view-switcher {
+    display: flex;
+    background-color: var(--surface);
+    border-radius: 8px;
+    padding: 2px;
+    border: 1px solid var(--border-color);
+}
+.view-switcher button {
+    border: none;
+    padding: 0.4rem;
+}
+.view-switcher button.active {
+    background-color: var(--primary);
+}
+[data-theme="light"] .view-switcher button.active svg {
+    stroke: #fff;
+}
+.view-switcher button.active svg {
+    stroke: #000;
+}
+.view-switcher button:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+main {
+    flex: 1;
+}
+
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+
+.page-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+#notes-container, #public-notes-container {
+    padding-bottom: 4rem;
+    transition: all 0.3s ease;
+}
+
+/* List View */
+.list-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.list-view .note-card {
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Board View */
+.board-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.note-card {
+    background: var(--note-bg, var(--surface));
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+    position: relative;
+    transition: box-shadow 0.2s ease, background-color 0.3s ease;
+    cursor: grab;
+}
+
+.note-card.draggable {
+    cursor: grab;
+}
+
+.note-card.draggable:active {
+    cursor: grabbing;
+}
+
+.note-card:active {
+    cursor: grabbing;
+}
+
+.note-card.sortable-ghost {
+    opacity: 0.4;
+    background: #444;
+}
+
+.note-card-toolbar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.note-card-toolbar button {
+    background-color: rgba(0,0,0,0.2);
+    color: var(--on-surface-secondary);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.note-card:hover .note-card-toolbar button {
+    opacity: 1;
+}
+
+.note-card-delete-btn {
+    background-color: rgba(0,0,0,0.2);
+    color: var(--on-surface-secondary);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.note-card:hover .note-card-delete-btn {
+    opacity: 1;
+}
+
+.note-card-delete-btn:hover {
+    background-color: #e53935;
+    color: #fff;
+}
+
+.note-card-share-btn, .note-card-copy-btn {
+    background-color: rgba(0,0,0,0.2);
+    color: var(--on-surface-secondary);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.note-card:hover .note-card-share-btn, .note-card:hover .note-card-copy-btn {
+    opacity: 1;
+}
+
+.note-card-share-btn.shared {
+    background-color: #10b981;
+    color: #fff;
+    opacity: 1;
+}
+.note-card-share-btn.shared svg {
+    stroke: #fff;
+}
+[data-theme="dark"] .note-card-share-btn.shared {
+    color: #000;
+}
+
+.note-card-color-btn:hover {
+    background-color: var(--primary);
+    color: #fff;
+}
+[data-theme="dark"] .note-card-color-btn:hover {
+    color: #000;
+}
+
+.note-card-palette {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    z-index: 20;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.note-card-palette.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.note-card-palette-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.note-card-palette-swatch:hover {
+    border-color: var(--primary);
+}
+
+.note-content {
+    outline: none;
+    min-height: 50px;
+    line-height: 1.6;
+}
+
+.note-card .note-content[placeholder]:empty:before {
+    content: attr(placeholder);
+    color: var(--on-surface-secondary);
+    cursor: text;
+}
+
+.subtitle {
+    color: var(--on-surface-secondary);
+    text-align: center;
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+}
+
+.static-content {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+.static-content h3 {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+.static-content ul {
+    line-height: 1.8;
+}
+
+.note-card-markdown-btn {
+    background-color: rgba(0,0,0,0.2);
+    color: var(--on-surface-secondary);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.note-card:hover .note-card-markdown-btn {
+    opacity: 1;
+}
+
+.note-card-markdown-btn.active {
+    background-color: var(--primary);
+    color: #fff;
+    opacity: 1;
+}
+[data-theme="dark"] .note-card-markdown-btn.active {
+    color: #000;
+}
+
+.note-card-markdown-btn:hover {
+    background-color: var(--primary);
+    color: #fff;
+}
+[data-theme="dark"] .note-card-markdown-btn:hover {
+    color: #000;
+}
+
+.note-content-markdown {
+    min-height: 50px;
+    line-height: 1.6;
+    padding: 0.5rem 0;
+}
+
+.note-content-markdown h1,
+.note-content-markdown h2,
+.note-content-markdown h3,
+.note-content-markdown h4,
+.note-content-markdown h5,
+.note-content-markdown h6 {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--on-surface);
+}
+
+.note-content-markdown h1 { font-size: 1.5rem; }
+.note-content-markdown h2 { font-size: 1.3rem; }
+.note-content-markdown h3 { font-size: 1.1rem; }
+
+.note-content-markdown p {
+    margin: 0.5rem 0;
+}
+
+.note-content-markdown ul,
+.note-content-markdown ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.note-content-markdown li {
+    margin: 0.25rem 0;
+}
+
+.note-content-markdown code {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+}
+
+.note-content-markdown pre {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+
+.note-content-markdown pre code {
+    background: none;
+    padding: 0;
+}
+
+.note-content-markdown blockquote {
+    border-left: 4px solid var(--primary);
+    margin: 0.5rem 0;
+    padding: 0.5rem 1rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    font-style: italic;
+}
+
+.note-content-markdown a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.note-content-markdown a:hover {
+    text-decoration: underline;
+}
+
+.note-content-markdown table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.5rem 0;
+}
+
+.note-content-markdown th,
+.note-content-markdown td {
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.note-content-markdown th {
+    background-color: rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+}
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "sortablejs": "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js",
+                "marked": "https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <h1>JennyCloud </h1>
+            <nav class="main-nav">
+                <button id="my-ideas-tab" class="nav-tab active" data-tab="my-ideas">Notes</button>
+
+            </nav>
+        </div>
+
+        <div class="controls">
+            <button id="add-note-btn">＋ New</button>
+            <div class="theme-switcher">
+                <button id="theme-toggle-btn" title="Toggle Theme">
+                    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="my-ideas-content" class="tab-content active">
+             <div class="page-controls">
+                <div class="view-switcher">
+                    <button id="list-view-btn" class="active" title="List View">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    </button>
+                    <button id="board-view-btn" title="Board View">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="notes-container" class="list-view"></div>
+        </div>
+
+    </main>
+
+    <script>
+
+      import { Sortable } from 'sortablejs';
+      import { marked } from 'marked';
+
+const notesContainer = document.getElementById('notes-container');
+const publicNotesContainer = document.getElementById('public-notes-container');
+const addNoteBtn = document.getElementById('add-note-btn');
+const listViewBtn = document.getElementById('list-view-btn');
+const boardViewBtn = document.getElementById('board-view-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIconSun = document.getElementById('theme-icon-sun');
+const themeIconMoon = document.getElementById('theme-icon-moon');
+const clearDataBtn = document.getElementById('clear-data-btn');
+
+const tabButtons = document.querySelectorAll('.nav-tab');
+const tabContents = document.querySelectorAll('.tab-content');
+
+const NOTE_COLORS = {
+    default: 'var(--note-color-default)',
+    red: 'var(--note-color-red)',
+    yellow: 'var(--note-color-yellow)',
+    green: 'var(--note-color-green)',
+    blue: 'var(--note-color-blue)',
+    purple: 'var(--note-color-purple)',
+};
+
+let state = {
+    notes: [],
+    view: 'list', // 'list' or 'board'
+    theme: 'dark',
+    activeTab: 'my-ideas',
+};
+
+// --- Storage Keys ---
+const STATE_KEY = 'ideaBoardState';
+const PUBLIC_FORUM_KEY = 'ideaBoardPublicForum';
+
+function saveState() {
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+
+function loadState() {
+    const savedState = localStorage.getItem(STATE_KEY);
+    if (savedState) {
+        state = JSON.parse(savedState);
+        // Default migration for old states
+        if (!state.theme) state.theme = 'dark';
+        if (!state.activeTab) state.activeTab = 'my-ideas';
+        state.notes.forEach(n => {
+            if(!n.color) n.color = 'default';
+            if(n.isPublic === undefined) n.isPublic = false;
+        });
+    }
+}
+
+function render() {
+    // Apply theme
+    document.documentElement.setAttribute('data-theme', state.theme);
+    if (state.theme === 'dark') {
+        themeIconSun.style.display = 'none';
+        themeIconMoon.style.display = 'block';
+    } else {
+        themeIconSun.style.display = 'block';
+        themeIconMoon.style.display = 'none';
+    }
+
+    // Handle Tab visibility
+    tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === state.activeTab);
+    });
+    tabContents.forEach(content => {
+        content.classList.toggle('active', content.id === `${state.activeTab}-content`);
+    });
+    
+    // Show/hide controls based on tab
+    const myIdeasControls = document.querySelector('.page-controls');
+    if (state.activeTab === 'my-ideas') {
+        addNoteBtn.style.display = 'flex';
+        myIdeasControls.style.display = 'flex';
+        renderMyIdeas();
+    } else {
+        addNoteBtn.style.display = 'none';
+        myIdeasControls.style.display = 'none';
+    }
+
+    if (state.activeTab === 'public-forum') {
+        renderPublicForum();
+    }
+}
+
+function renderMyIdeas() {
+    notesContainer.innerHTML = '';
+    
+    // Set view class
+    if (state.view === 'board') {
+        notesContainer.classList.remove('list-view');
+        notesContainer.classList.add('board-view');
+        boardViewBtn.classList.add('active');
+        listViewBtn.classList.remove('active');
+    } else {
+        notesContainer.classList.remove('board-view');
+        notesContainer.classList.add('list-view');
+        listViewBtn.classList.add('active');
+        boardViewBtn.classList.remove('active');
+    }
+
+    if (state.notes.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.textContent = "No ideas yet. Let's create one!";
+        emptyMessage.style.color = 'var(--on-surface-secondary)';
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.padding = '2rem';
+        notesContainer.appendChild(emptyMessage);
+        return;
+    }
+    
+    state.notes.forEach(note => {
+        const noteEl = createNoteElement(note, { editable: true, draggable: true });
+        notesContainer.appendChild(noteEl);
+    });
+}
+
+function renderPublicForum() {
+    publicNotesContainer.innerHTML = '';
+    const publicNotes = JSON.parse(localStorage.getItem(PUBLIC_FORUM_KEY) || '[]');
+
+    if (publicNotes.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.textContent = "The forum is empty. Share an idea to get it started!";
+        emptyMessage.style.color = 'var(--on-surface-secondary)';
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.padding = '2rem';
+        publicNotesContainer.appendChild(emptyMessage);
+        return;
+    }
+
+    publicNotes.forEach(note => {
+        const noteEl = createNoteElement(note, { editable: false, draggable: false });
+        publicNotesContainer.appendChild(noteEl);
+    });
+}
+
+function createNoteElement(note, options = {}) {
+    const { editable, draggable } = { editable: false, draggable: false, ...options };
+    const { id, content, color, isPublic } = note;
+
+    const card = document.createElement('div');
+    card.className = 'note-card';
+    if(draggable) card.classList.add('draggable');
+    card.dataset.id = id;
+    card.style.setProperty('--note-bg', NOTE_COLORS[color]);
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'note-card-toolbar';
+
+    if (editable) {
+        // --- Markdown Toggle Button ---
+        const markdownBtn = document.createElement('button');
+        markdownBtn.className = 'note-card-markdown-btn';
+        markdownBtn.title = "Toggle markdown preview";
+        markdownBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M5 8V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8"></path><path d="M9 10h6"></path><path d="M9 14h6"></path><path d="M9 18h2"></path></svg>`;
+        markdownBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleMarkdownPreview(id);
+        };
+        toolbar.appendChild(markdownBtn);
+
+        // --- Color Palette ---
+        const paletteBtn = document.createElement('button');
+        paletteBtn.className = 'note-card-color-btn';
+        paletteBtn.title = "Change color";
+        paletteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`;
+        
+        const palette = document.createElement('div');
+        palette.className = 'note-card-palette';
+
+        Object.keys(NOTE_COLORS).forEach(colorKey => {
+            const swatch = document.createElement('div');
+            swatch.className = 'note-card-palette-swatch';
+            swatch.style.backgroundColor = NOTE_COLORS[colorKey];
+            swatch.dataset.color = colorKey;
+            swatch.onclick = (e) => {
+                e.stopPropagation();
+                updateNoteColor(id, colorKey);
+                palette.classList.remove('visible');
+            };
+            palette.appendChild(swatch);
+        });
+
+        paletteBtn.onclick = (e) => {
+            e.stopPropagation();
+            // Hide other palettes
+            document.querySelectorAll('.note-card-palette').forEach(p => {
+                if (p !== palette) p.classList.remove('visible');
+            });
+            palette.classList.toggle('visible');
+        };
+        toolbar.appendChild(paletteBtn);
+        card.appendChild(palette);
+
+        // --- Share Button ---
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'note-card-share-btn';
+        if (isPublic) {
+            shareBtn.classList.add('shared');
+            shareBtn.title = "Shared to public forum";
+        } else {
+            shareBtn.title = "Share to public forum";
+        }
+        shareBtn.innerHTML = isPublic 
+            ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1.05V7h6"></path><path d="M10 21.95V17H4"></path><path d="M7 14l-3 3 3 3"></path><path d="M20 7l-3-3-3 3"></path></svg>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>`;
+        shareBtn.onclick = () => {
+            if (!isPublic) shareNote(id);
+        };
+        toolbar.appendChild(shareBtn);
+        
+        // --- Delete Button ---
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'note-card-delete-btn';
+        deleteBtn.title = "Delete note";
+        deleteBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        `;
+        deleteBtn.onclick = () => deleteNote(id);
+        toolbar.appendChild(deleteBtn);
+
+        // Hide palette on click outside
+        card.addEventListener('mouseleave', () => {
+             if (palette) palette.classList.remove('visible');
+        });
+
+    } else { // Not editable (public note)
+        // --- Copy Button ---
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'note-card-copy-btn';
+        copyBtn.title = "Copy to My Ideas";
+        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        copyBtn.onclick = () => copyNoteToBoard(note);
+        toolbar.appendChild(copyBtn);
+    }
+    
+    card.appendChild(toolbar);
+
+    const contentEl = document.createElement('div');
+    contentEl.className = 'note-content';
+    contentEl.contentEditable = editable;
+    if (editable) {
+        contentEl.setAttribute('placeholder', 'Write something...');
+    }
+    contentEl.textContent = content;
+
+    if (editable) {
+        contentEl.addEventListener('blur', (e) => {
+            updateNoteContent(id, e.target.textContent);
+        });
+    }
+    card.appendChild(contentEl);
+    
+    return card;
+}
+
+function toggleMarkdownPreview(id) {
+    const noteCard = notesContainer.querySelector(`.note-card[data-id="${id}"]`);
+    if (!noteCard) return;
+
+    const contentEl = noteCard.querySelector('.note-content');
+    const markdownBtn = noteCard.querySelector('.note-card-markdown-btn');
+    
+    if (contentEl.contentEditable === 'true') {
+        // Switch to preview mode
+        const markdownContent = contentEl.textContent;
+        const htmlContent = marked.parse(markdownContent);
+        
+        contentEl.innerHTML = htmlContent;
+        contentEl.contentEditable = 'false';
+        contentEl.classList.add('note-content-markdown');
+        markdownBtn.classList.add('active');
+        markdownBtn.title = "Edit markdown";
+    } else {
+        // Switch to edit mode
+        const note = state.notes.find(n => n.id === id);
+        if (note) {
+            contentEl.textContent = note.content;
+            contentEl.contentEditable = 'true';
+            contentEl.classList.remove('note-content-markdown');
+            markdownBtn.classList.remove('active');
+            markdownBtn.title = "Toggle markdown preview";
+        }
+    }
+}
+
+function addNote() {
+    const newNote = {
+        id: `note-${Date.now()}`,
+        content: '',
+        color: 'default',
+        isPublic: false,
+    };
+    state.notes.unshift(newNote); // Add to the beginning
+    saveState();
+    renderMyIdeas();
+    // Focus the new note
+    notesContainer.querySelector('.note-card .note-content')?.focus();
+}
+
+function updateNoteContent(id, newContent) {
+    const note = state.notes.find(n => n.id === id);
+    if (note && note.content !== newContent) {
+        note.content = newContent;
+        saveState();
+    }
+}
+
+function updateNoteColor(id, newColor) {
+    const note = state.notes.find(n => n.id === id);
+    if (note) {
+        note.color = newColor;
+        const noteCard = notesContainer.querySelector(`.note-card[data-id="${id}"]`);
+        if (noteCard) {
+            noteCard.style.setProperty('--note-bg', NOTE_COLORS[newColor]);
+        }
+        saveState();
+    }
+}
+
+function deleteNote(id) {
+    state.notes = state.notes.filter(n => n.id !== id);
+    saveState();
+    renderMyIdeas();
+}
+
+function shareNote(id) {
+    const noteToShare = state.notes.find(n => n.id === id);
+    if (!noteToShare || noteToShare.isPublic) return;
+
+    // Mark as public in local state
+    noteToShare.isPublic = true;
+    
+    // Get public notes, add new one, save back
+    const publicNotes = JSON.parse(localStorage.getItem(PUBLIC_FORUM_KEY) || '[]');
+    
+    // Create a clean copy for the public forum
+    const publicCopy = {
+        id: noteToShare.id, // Keep original ID to prevent duplicates
+        content: noteToShare.content,
+        color: noteToShare.color,
+        sharedAt: new Date().toISOString()
+    };
+    
+    // Avoid duplicates
+    const existingIndex = publicNotes.findIndex(n => n.id === publicCopy.id);
+    if (existingIndex > -1) {
+        publicNotes[existingIndex] = publicCopy;
+    } else {
+        publicNotes.unshift(publicCopy);
+    }
+
+    localStorage.setItem(PUBLIC_FORUM_KEY, JSON.stringify(publicNotes));
+    saveState();
+    renderMyIdeas();
+    alert('Idea shared to the Public Forum!');
+}
+
+function copyNoteToBoard(noteToCopy) {
+    const newNote = {
+        id: `note-${Date.now()}`, // new id
+        content: noteToCopy.content,
+        color: noteToCopy.color,
+        isPublic: false, // It's a private copy
+    };
+    state.notes.unshift(newNote);
+    saveState();
+    state.activeTab = 'my-ideas';
+    render();
+    alert('Note copied to "My Ideas"!');
+}
+
+// Event Listeners
+addNoteBtn.addEventListener('click', addNote);
+
+listViewBtn.addEventListener('click', () => {
+    state.view = 'list';
+    renderMyIdeas();
+    saveState();
+});
+
+boardViewBtn.addEventListener('click', () => {
+    state.view = 'board';
+    renderMyIdeas();
+    saveState();
+});
+
+themeToggleBtn.addEventListener('click', () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    render();
+    saveState();
+});
+
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        state.activeTab = button.dataset.tab;
+        render();
+        saveState();
+    });
+});
+
+clearDataBtn.addEventListener('click', () => {
+    if (confirm("Are you sure you want to delete ALL your ideas and settings? This cannot be undone.")) {
+        localStorage.removeItem(STATE_KEY);
+        // Maybe also clear public notes for a full reset? For now, no.
+        // localStorage.removeItem(PUBLIC_FORUM_KEY);
+        window.location.reload();
+    }
+});
+
+document.addEventListener('click', (e) => {
+    // Hide palettes if clicking outside a note card
+    if (!e.target.closest('.note-card')) {
+        document.querySelectorAll('.note-card-palette').forEach(p => p.classList.remove('visible'));
+    }
+});
+
+// Drag and Drop
+new Sortable(notesContainer, {
+    animation: 150,
+    handle: '.draggable',
+    ghostClass: 'sortable-ghost',
+    onEnd: (evt) => {
+        const noteId = evt.item.dataset.id;
+        const noteToMove = state.notes.find(n => n.id === noteId);
+        
+        // Remove from old position
+        state.notes = state.notes.filter(n => n.id !== noteId);
+        // Add to new position
+        state.notes.splice(evt.newIndex, 0, noteToMove);
+        
+        saveState();
+    }
+});
+
+// Initial Load
+loadState();
+render();
+    </script>
+</body>
+
+</html>
