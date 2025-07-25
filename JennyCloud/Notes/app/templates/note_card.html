@@ -1,0 +1,60 @@
+<div class="note-card" data-id="{{ note.id }}" style="--note-bg: var(--note-color-{{ note.color }});">
+    <div class="note-card-toolbar">
+        {% if editable %}
+            <button class="note-card-markdown-btn" title="Toggle markdown preview" onclick="toggleMarkdownPreview('{{ note.id }}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M5 8V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8"></path><path d="M9 10h6"></path><path d="M9 14h6"></path><path d="M9 18h2"></path></svg>
+            </button>
+            
+            <div class="note-card-palette" id="palette-{{ note.id }}">
+                {% for color in ['default', 'red', 'yellow', 'green', 'blue', 'purple'] %}
+                    <div class="note-card-palette-swatch" 
+                         style="background-color: var(--note-color-{{ color }});"
+                         hx-put="/notes/{{ note.id }}/color"
+                         hx-vals='{"color": "{{ color }}"}'
+                         hx-target="closest .note-card"
+                         hx-swap="outerHTML"
+                         onclick="hidePalette('{{ note.id }}')"></div>
+                {% endfor %}
+            </div>
+
+            <button class="note-card-share-btn {% if note.is_public %}shared{% endif %}" 
+                    title="{% if note.is_public %}Shared to public forum{% else %}Share to public forum{% endif %}"
+                    {% if not note.is_public %}
+                        hx-post="/notes/{{ note.id }}/share"
+                        hx-target="closest .note-card"
+                        hx-swap="outerHTML"
+                    {% endif %}>
+                {% if note.is_public %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1.05V7h6"></path><path d="M10 21.95V17H4"></path><path d="M7 14l-3 3 3 3"></path><path d="M20 7l-3-3-3 3"></path></svg>
+                {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                {% endif %}
+            </button>
+            
+            <button class="note-card-delete-btn" title="Delete note"
+                    hx-delete="/notes/{{ note.id }}"
+                    hx-target="closest .note-card"
+                    hx-swap="outerHTML"
+                    hx-confirm="Are you sure you want to delete this note?">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+        {% else %}
+            <button class="note-card-copy-btn" title="Copy to My Ideas"
+                    hx-post="/notes/{{ note.id }}/copy"
+                    hx-target="body"
+                    hx-swap="none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="note-content" 
+         {% if editable %}
+             contenteditable="true"
+             placeholder="Write something..."
+             hx-put="/notes/{{ note.id }}"
+             hx-trigger="focusout"
+             hx-include="this"
+             hx-vals='js:{"content": this.textContent}'
+         {% endif %}>{{ note.content }}</div>
+</div>
