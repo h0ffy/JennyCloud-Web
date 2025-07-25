@@ -1,0 +1,459 @@
+/* Based on VS6, modernized, dark mode. */
+
+:root {
+  --dark-bg: #282a36;
+  --panel-bg: #44475a;
+  --active-tab: #6272a4;
+  --border: #6272a4;
+  --highlight: #bd93f9;
+  --text: #f8f8f2;
+  --muted: #8be9fd;
+  --sidebar-width: 240px;
+  --console-height: 190px;
+  --menubar-bg: #21222c;
+  --active-menu-bg: #44475a;
+  --dropdown-bg: #383a59;
+  --panel-radius: 4px;
+  --shadow: 0 4px 20px rgba(0,0,0,.16);
+  --font: 'Segoe UI', 'Consolas', 'monospace', sans-serif;
+  --accent: #ff79c6;
+  --winbox-titlebar: #383a59;
+}
+
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font);
+  background: var(--dark-bg);
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* IDE ROOT LAYOUT */
+#ide-root {
+  width: 100vw;
+  height: 100vh;
+  background: var(--dark-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+#ide-initial-cover {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, #282a36 60%, #44475a 93%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+  transition: opacity 0.3s;
+}
+
+#ide-initial-cover.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#ide-initial-cover h1 {
+  font-size: 2.8rem;
+  color: var(--accent);
+  text-shadow: 0 4px 12px #21222c;
+  margin-bottom: 0.2em;
+  margin-top: 0;
+}
+#ide-initial-cover p {
+  margin: 0 0 1.3em 0;
+  font-size: 1.2em;
+  color: var(--text);
+}
+
+#ide-initial-cover .hint {
+  color: var(--muted);
+  font-size: 1em;
+}
+
+/* MENUBAR STYLES */
+#ide-menubar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 36px;
+  width: 100%;
+  background: var(--menubar-bg);
+  box-shadow: 0 1px 0 var(--border);
+  z-index: 100;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  font-size: 1em;
+  user-select: none;
+  padding-right: 130px;
+}
+
+#ide-menubar .menu {
+  position: relative;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-width: 72px;
+  padding: 0 16px;
+  color: var(--muted);
+  transition: background 0.17s;
+}
+
+#ide-menubar .menu:focus,
+#ide-menubar .menu:hover {
+  background: var(--active-menu-bg);
+  color: var(--accent);
+}
+
+#ide-menubar .menu .dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 2px;
+  min-width: 280px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--panel-radius) var(--panel-radius);
+  box-shadow: var(--shadow);
+  z-index: 999;
+  flex-direction: column;
+  margin-top: -1px;
+  padding: 5px 0;
+}
+
+#ide-menubar .menu:focus .dropdown,
+#ide-menubar .menu:hover .dropdown {
+  display: flex;
+}
+
+#ide-menubar .menu-item {
+  padding: 0.6em 1.4em 0.6em 2.2em;
+  white-space: nowrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text);
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+#ide-menubar .menu-item:hover {
+  background: var(--active-menu-bg);
+  color: var(--accent);
+}
+#ide-menubar .menu-item span {
+  color: var(--muted);
+  margin-left: 1em;
+  font-size: 0.87em;
+}
+
+#ide-menubar hr {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  margin: 5px 0;
+}
+
+#ide-title {
+  margin-left: 30px;
+  flex: 1;
+  color: var(--highlight);
+  align-self: center;
+  text-align: left;
+  font-family: monospace;
+  font-size: 1.1em;
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* WINBOX OVERRIDES */
+.winbox {
+  font-family: var(--font) !important;
+  background: var(--panel-bg);
+}
+.winbox .wb-title {
+  color: var(--accent);
+  background: var(--winbox-titlebar) !important;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+.winbox .wb-body {
+  background: var(--panel-bg) !important;
+  color: var(--text);
+  overflow: auto;
+}
+.winbox:not(.active) {
+  opacity: 0.88;
+}
+
+.winbox .wb-control {
+  filter: contrast(0.9) brightness(1.1);
+}
+
+/* IDE PANELS (File, Tabs, Console etc) */
+
+/* File Explorer (Sidebar) */
+.ide-file-explorer {
+  width: var(--sidebar-width);
+  background: var(--panel-bg);
+  height: 100%;
+  overflow: auto;
+  border-right: 1.5px solid var(--border);
+  box-shadow: 2px 0 10px #1c217031;
+  padding: 0.4em 0.2em 0.7em 0.2em;
+}
+
+.ide-file-explorer .tree {
+  padding-left: 0.25em;
+  margin: 0.5em 0;
+}
+
+.ide-file-explorer .file,
+.ide-file-explorer .folder {
+  cursor: pointer;
+  padding: 3px 0.8em 3px 2.2em;
+  font-size: 1em;
+  line-height: 1.35;
+  position: relative;
+  color: var(--muted);
+  border-radius: 3px;
+}
+
+.ide-file-explorer .folder {
+  font-weight: 600;
+  color: var(--highlight);
+  padding-left: 1.6em;
+}
+
+.ide-file-explorer .file.selected {
+  background: var(--active-tab);
+  color: var(--accent);
+}
+
+.ide-file-explorer .file[data-type='py'],
+.ide-file-explorer .file.selected[data-type='py'],
+.ide-tab[data-type='py'] {
+  color: #50fa7b;
+}
+
+/* Main Tabs Area */
+.ide-tabs-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--panel-bg);
+}
+
+.ide-tab-bar {
+  display: flex;
+  align-items: stretch;
+  background: var(--winbox-titlebar);
+  border-bottom: 1.5px solid var(--border);
+  height: 37px;
+}
+
+.ide-tab {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-right: 1px solid var(--border);
+  outline: none;
+  padding: 0 28px 0 42px;
+  min-width: 90px;
+  height: 100%;
+  line-height: 35px;
+  cursor: pointer;
+  position: relative;
+  font-size: 1em;
+  transition: background 0.15s, color 0.15s;
+}
+.ide-tab.active {
+  background: var(--active-tab);
+  color: var(--accent);
+  border-bottom: 2.7px solid var(--accent);
+  z-index: 2;
+}
+.ide-tab .close {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  font-size: 1em;
+  color: var(--muted);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+.ide-tab .close:hover {
+  color: #fd4242;
+  opacity: 1;
+}
+.ide-tab .icon {
+  position: absolute;
+  left: 11px;
+  top: 9px;
+  font-size: 1em;
+}
+
+/* Editor Style */
+.ide-editor-pane {
+  flex: 1;
+  overflow: auto;
+  background: var(--panel-bg);
+  padding: 0.85em 0.6em 1em 1.5em;
+  font-family: 'Fira Mono','Consolas','monospace',monospace;
+  font-size: 1.12em;
+  color: var(--text);
+  line-height: 1.65;
+}
+
+.ide-editor-pane textarea,
+.ide-editor-pane pre {
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  color: inherit;
+  outline: none;
+  border: none;
+  width: 100%;
+  min-height: 270px;
+  resize: none;
+  line-height: 1.62;
+}
+.ide-editor-pane textarea {
+  background: none;
+  color: inherit;
+  caret-color: var(--highlight);
+  display: none;
+}
+.ide-editor-pane pre {
+  padding: 0.6em 0.5em 0.6em 1.5em;
+  border-radius: 4px;
+  background: #282a36;
+  max-width: 100%;
+  overflow-x: auto;
+  min-height: 420px;
+  outline: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.62;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
+}
+
+/* Syntax highlighted (readonly/preview) code */
+.hljs {
+  background: transparent !important;
+}
+
+/* PREVIEW */
+.ide-preview {
+  height: 100%;
+  background: #282a36;
+  border-left: 2.5px solid var(--border);
+  border-top: none !important;
+  overflow: auto;
+  padding: 8px 0 0 0;
+}
+
+/* CONSOLE */
+.ide-console {
+  width: 100%;
+  background: #21222c;
+  color: #f8f8f2;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 1em;
+  min-height: 125px;
+  border-top: 2px solid var(--border);
+  box-shadow: 0px -2px 12px #21222c27;
+  padding: 8px 22px;
+  overflow-y: auto;
+}
+
+.ide-console .log {
+  margin-bottom: 1.2em;
+}
+.ide-console .log.error {
+  color: #ff5555;
+}
+.ide-console .log.warn {
+  color: #f1fa8c;
+}
+.ide-console .log.info {
+  color: #8be9fd;
+}
+
+/* SCROLLBARS (Modern, dark) */
+::-webkit-scrollbar {
+  width: 13px;
+  background: var(--winbox-titlebar);
+}
+::-webkit-scrollbar-thumb {
+  background: #393e4b;
+  border-radius: 6px;
+  border: 3px solid var(--winbox-titlebar);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4a539a;
+}
+
+/* Utility */
+.noselect {
+  user-select: none;
+}
+.hide {
+  display: none !important;
+}
+
+/* DRAG HINT/CURSOR */
+.ide-dragtab-hint {
+  pointer-events: none;
+  position: fixed;
+  z-index: 9999;
+  opacity: 0.7;
+  transition: box-shadow 0.14s;
+  background: var(--panel-bg);
+  border: 2.5px solid var(--highlight);
+  border-radius: 6px;
+  padding: 6px 40px;
+  color: var(--accent);
+  box-shadow: 0 12px 35px #050a30a8;
+}
+
+/* AI related */
+.ide-ai-suggestion {
+  background: #6272a4;
+  color: #f8f8f2;
+  padding: 0.28em 0.65em 0.28em 0.3em;
+  border-radius: 3px;
+  font-style: italic;
+  opacity: 0.92;
+}
+.ide-ai-tooltip {
+  color: var(--accent);
+  background: #21222ccc;
+  font-size: 1em;
+  position: absolute;
+  padding: 8px 16px;
+  border-radius: 5px;
+  max-width: 360px;
+  border: 1.5px solid var(--highlight);
+  z-index: 4000;
+  pointer-events: none;
+}
+
+/* THEME TRANSITION ANIMATION */
+.theme-transition * {
+  transition: color .28s, background .28s, border .28s, box-shadow .22s;
+}
