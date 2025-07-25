@@ -12,8 +12,8 @@ const DEFAULT_FILES = {
 <head>
   <meta charset="UTF-8">
   <title>Web Project in Jenny IDE</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js"></script>
+  <link rel="stylesheet" href="codedev_style.css">
+  <script src="codedev_script.js"></script>
 </head>
 <body>
   <h1>Hello, Jenny IDE!</h1>
