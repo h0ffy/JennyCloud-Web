@@ -1,0 +1,14 @@
+<div class="subtitle">Ideas shared by the community</div>
+
+<div id="public-notes-container" class="list-view">
+    {% if notes %}
+        {% for note in notes %}
+            {% set editable = false %}
+            {% include 'note_card.html' %}
+        {% endfor %}
+    {% else %}
+        <div style="color: var(--on-surface-secondary); text-align: center; padding: 2rem;">
+            The forum is empty. Share an idea to get it started!
+        </div>
+    {% endif %}
+</div>
