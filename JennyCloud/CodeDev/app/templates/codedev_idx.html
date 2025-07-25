@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jenny IDE - WinBox Multimodal IDE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- WinBox CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/winbox@0.2.82/dist/css/winbox.min.css">
+  
+  <!-- Highlight.js dark theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Custom IDE styles -->
+  <link rel="stylesheet" href="ide.css">
+
+  <!-- JS dependencies via import maps for modern browsers -->
+  <script type="importmap">
+    {
+      "imports": {
+        "highlight.js": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="ide-root">
+    <!-- Menubar -->
+    <div id="ide-menubar">
+      <div class="menu" tabindex="0">
+        <span>File</span>
+        <div class="dropdown">
+          <div class="menu-item" onclick="JennyIDE.newFile()">New File <span>Ctrl+N</span></div>
+          <div class="menu-item" onclick="JennyIDE.openFile()">Open... <span>Ctrl+O</span></div>
+          <div class="menu-item" onclick="JennyIDE.saveFile()">Save <span>Ctrl+S</span></div>
+          <div class="menu-item" onclick="JennyIDE.saveAll()">Save All</div>
+          <hr/>
+          <div class="menu-item" onclick="JennyIDE.closeTab()">Close Tab <span>Ctrl+W</span></div>
+          <div class="menu-item" onclick="JennyIDE.exitIDE()">Exit</div>
+        </div>
+      </div>
+      <div class="menu" tabindex="0">
+        <span>Edit</span>
+        <div class="dropdown">
+          <div class="menu-item" onclick="JennyIDE.undo()">Undo <span>Ctrl+Z</span></div>
+          <div class="menu-item" onclick="JennyIDE.redo()">Redo <span>Ctrl+Y</span></div>
+          <hr/>
+          <div class="menu-item" onclick="JennyIDE.cut()">Cut <span>Ctrl+X</span></div>
+          <div class="menu-item" onclick="JennyIDE.copy()">Copy <span>Ctrl+C</span></div>
+          <div class="menu-item" onclick="JennyIDE.paste()">Paste <span>Ctrl+V</span></div>
+          <hr/>
+          <div class="menu-item" onclick="JennyIDE.find()">Find <span>Ctrl+F</span></div>
+          <div class="menu-item" onclick="JennyIDE.replace()">Replace <span>Ctrl+H</span></div>
+        </div>
+      </div>
+      <div class="menu" tabindex="0">
+        <span>View</span>
+        <div class="dropdown">
+          <div class="menu-item" onclick="JennyIDE.toggleFileExplorer()">Toggle File Explorer</div>
+          <div class="menu-item" onclick="JennyIDE.toggleConsole()">Toggle Console</div>
+          <div class="menu-item" onclick="JennyIDE.togglePreview()">Toggle Preview</div>
+          <div class="menu-item" onclick="JennyIDE.toggleTheme()">Toggle Dark/Light Theme</div>
+        </div>
+      </div>
+      <div class="menu" tabindex="0">
+        <span>AI</span>
+        <div class="dropdown">
+          <div class="menu-item" onclick="JennyIDE.ai.codeComplete()">Code Complete <span>Tab</span></div>
+          <div class="menu-item" onclick="JennyIDE.ai.refactor()">Refactor Selected</div>
+          <div class="menu-item" onclick="JennyIDE.ai.explain()">Explain Selected</div>
+          <div class="menu-item" onclick="JennyIDE.ai.fixBugs()">Debug/Auto Fix</div>
+          <hr/>
+          <div class="menu-item" onclick="JennyIDE.ai.generateFromPrompt()">Generate Code (Prompt)</div>
+          <div class="menu-item" id="theme-assist-toggle-menu-item" onclick="JennyIDE.toggleThemeAssist()">
+            <span id="theme-assist-toggle-check" style="display:inline-block;width:16px;"></span>
+            Theme Designer Assist (Auto Update)
+          </div>
+        </div>
+      </div>
+      <div class="menu" tabindex="0">
+        <span>Help</span>
+        <div class="dropdown">
+          <div class="menu-item" onclick="JennyIDE.showAbout()">About</div>
+          <div class="menu-item" onclick="JennyIDE.showShortcuts()">Keyboard Shortcuts</div>
+        </div>
+      </div>
+      <div id="ide-title">Jenny IDE</div>
+    </div>
+
+    <!-- Docked WinBox areas will be launched via JS -->
+
+    <div id="ide-initial-cover">
+      <div>
+        <h1>Jenny IDE</h1>
+        <p>Flexible Modern IDE for Web Development</p>
+        <span class="hint">Loading workspace...</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- JS dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <!-- WinBox from JSDelivr (reliable for CORS and MIME handling) -->
+  <script src="https://cdn.jsdelivr.net/npm/winbox@0.2.82/dist/winbox.bundle.min.js"></script>
+  <!-- Python Highlight.js language (add-on) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script type="module" src="ide.js"></script>
+</body>
+</html>
