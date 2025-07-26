@@ -1,0 +1,204 @@
+<html>
+<head>
+<base href="https://ai-adaptive-system.example.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Logic Analyzer</title>
+<style>
+    body {
+        font-family: monospace;
+        margin: 0;
+        padding: 20px;
+        background-color: #1e1e1e;
+        color: #fff;
+    }
+    #canvas-container {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+    }
+    canvas {
+        width: 100%;
+        height: 300px;
+        background-color: #000;
+    }
+    .signal-label {
+        position: absolute;
+        left: 0;
+        color: #fff;
+        font-size: 12px;
+        padding: 2px 5px;
+    }
+    #controls {
+        margin: 20px auto;
+        width: 100%;
+        max-width: 800px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    button {
+        background-color: #2a2a2a;
+        color: #fff;
+        border: 1px solid #3a3a3a;
+        padding: 8px 16px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #3a3a3a;
+    }
+    #status {
+        margin: 20px auto;
+        width: 100%;
+        max-width: 800px;
+        padding: 10px;
+        background-color: #2a2a2a;
+        border-radius: 4px;
+    }
+</style>
+</head>
+<body>
+<h1>Digital Logic Analyzer</h1>
+<div id="controls">
+    <button onclick="toggleCapture()">Start/Stop</button>
+    <button onclick="clearDisplay()">Clear</button>
+    <button onclick="toggleTrigger()">Trigger Mode</button>
+    <button onclick="exportData()">Export</button>
+</div>
+<div id="canvas-container">
+    <canvas id="display"></canvas>
+</div>
+<div id="status">Ready</div>
+
+<script>
+const canvas = document.getElementById('display');
+const ctx = canvas.getContext('2d');
+const signals = [
+    { name: 'CLK', value: 0, color: '#00ff00' },
+    { name: 'DATA', value: 0, color: '#ff0000' },
+    { name: 'ADDR', value: 0, color: '#0000ff' },
+    { name: 'IRQ', value: 0, color: '#ffff00' },
+    { name: 'RW', value: 1, color: '#00ffff' }
+];
+
+let isCapturing = false;
+let triggerEnabled = false;
+let sampleRate = 1000; // Hz
+let timeBase = 100; // pixels per division
+let samples = [];
+let triggerLevel = 0.5;
+
+// Initialize canvas
+function initCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+}
+
+// Draw grid
+function drawGrid() {
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    
+    // Vertical lines
+    for(let x = 0; x < canvas.width; x += timeBase) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    
+    // Horizontal lines
+    const signalHeight = canvas.height / signals.length;
+    for(let y = 0; y < canvas.height; y += signalHeight) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+}
+
+// Update signal values
+function updateSignals() {
+    const time = Date.now() / 1000;
+    signals[0].value = Math.round(Math.sin(time * 10) + 1); // Clock
+    signals[1].value = Math.random() > 0.5 ? 1 : 0; // Data
+    signals[2].value = (Math.sin(time * 2) + 1) / 2; // Address
+    signals[3].value = Math.random() > 0.9 ? 1 : 0; // IRQ
+    signals[4].value = signals[1].value && signals[0].value; // R/W
+}
+
+// Draw signals
+function drawSignals() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+    
+    const signalHeight = canvas.height / signals.length;
+    signals.forEach((signal, i) => {
+        const y = i * signalHeight + signalHeight/2;
+        ctx.strokeStyle = signal.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, y - signal.value * signalHeight/3);
+        ctx.lineTo(canvas.width, y - signal.value * signalHeight/3);
+        ctx.stroke();
+    });
+}
+
+// Animation loop
+function animate() {
+    if(isCapturing) {
+        updateSignals();
+        drawSignals();
+        if(samples.length < 1000) {
+            samples.push(signals.map(s => s.value));
+        }
+        requestAnimationFrame(animate);
+    }
+}
+
+// Control functions
+function toggleCapture() {
+    isCapturing = !isCapturing;
+    if(isCapturing) {
+        document.getElementById('status').textContent = 'Capturing...';
+        animate();
+    } else {
+        document.getElementById('status').textContent = 'Stopped';
+    }
+}
+
+function clearDisplay() {
+    samples = [];
+    initCanvas();
+    document.getElementById('status').textContent = 'Display cleared';
+}
+
+function toggleTrigger() {
+    triggerEnabled = !triggerEnabled;
+    document.getElementById('status').textContent = 
+        `Trigger ${triggerEnabled ? 'enabled' : 'disabled'}`;
+}
+
+function exportData() {
+    const data = JSON.stringify(samples);
+    const blob = new Blob([data], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'logic_analyzer_data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('status').textContent = 'Data exported';
+}
+
+// Initialize
+window.addEventListener('resize', initCanvas);
+initCanvas();
+</script>
+</body>
+</html>

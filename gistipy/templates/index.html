@@ -1,0 +1,81 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenny sDashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+
+    <script type="importmap">
+        {
+            "imports": {
+                "htmx.org": "https://unpkg.com/htmx.org@1.9.10",
+                "marked": "https://cdn.jsdelivr.net/npm/marked@12.0.2/lib/marked.esm.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <canvas id="neuralCanvas"></canvas>
+
+    <div id="dashboardTitle">Jenny Interface</div>
+
+    <div id="mainLayoutContainer">
+        <div id="fileExplorerCard" class="info-card" style="width: 38%;"> 
+            <div class="card-title">
+                <span>File Explorer</span>
+                <button id="newFileButton" title="New Markdown File">➕</button>
+            </div>
+            <div class="card-content" style="display: flex; flex-direction: column; height: calc(100% - 40px);">
+                <div id="fileListContainer" 
+                     hx-get="/api/files" 
+                     hx-trigger="load" 
+                     hx-target="#fileList">
+                    <ul id="fileList">
+                        <!-- Files will be loaded from backend -->
+                    </ul>
+                </div>
+                <div class="file-actions">
+                    <button title="Create New File" id="newFileActionBtn">➕</button>
+                    <button title="Download" id="downloadFileActionBtn">📥</button>
+                    <button title="Compress" id="compressFileActionBtn">🗜</button>
+                    <button title="Search" id="searchFileActionBtn">🔎</button>
+                    <button title="Delete" id="deleteFileActionBtn">🗑</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="contentViewerCard" class="info-card" style="width: 62%;"> 
+            <div class="card-title">
+                <span id="contentViewerTitle">Select a file</span>
+                <div class="editor-main-controls" style="display: none;">
+                    <label title="Live Preview" class="custom-checkbox-label">
+                        &#128259; <input type="checkbox" id="livePreviewToggle" checked>
+                    </label>
+                    <button title="Clear Editor" id="clearEditorButton" class="editor-control-button">&#128702;</button>
+                    <button title="Save File" id="saveFileButton" class="editor-control-button">&#128190;</button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="tabs" style="display: none;">
+                    <button class="tab-button active" data-tab="editor">Editor</button>
+                    <button class="tab-button" data-tab="preview">Preview</button>
+                </div>
+
+                <div id="editorTabContent" class="tab-content">
+                    <textarea id="markdownEditorArea" placeholder="Select a Markdown file to begin editing, or create a new one."></textarea>
+                </div>
+                <div id="previewTabContent" class="tab-content">
+                    <div id="markdownPreviewArea"><p>Preview will appear here once a Markdown file is selected and edited.</p></div>
+                </div>
+                <div id="nonMdPreviewContainer" class="tab-content active">
+                     <p>Select a file from the explorer to view its content.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <script src="{{ url_for('static', path='js/script.js') }}"></script>
+        <script type="module" src="{{ url_for('static', path='js/app.js') }}"></script>
+
+</body>
+</html>
