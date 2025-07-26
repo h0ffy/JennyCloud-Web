@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-Cloud CodeEditor</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+    <div id="app-container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>J-Cloud CodeEditor</h1>
+                    <p>Write your code!</p>
+                </div>
+                <button id="theme-toggle" class="theme-toggle-btn">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <main id="main-content">
+            <div id="editor-pane">
+                <form 
+                    id="ai-helper-form"
+                    hx-post="/api/helper"
+                    hx-indicator="#ask-helper-btn"
+                    hx-target="#code-editor"
+                    hx-swap="beforeend"
+                >
+                    <h3>AI Helper</h3>
+                    <input type="text" id="helper-prompt" name="prompt" placeholder="e.g., a dancing robot with a hat">
+                    <button id="ask-helper-btn" type="submit">Get Code</button>
+                </form>
+                
+                <form 
+                    id="code-runner-form" 
+                    hx-post="/api/run"
+                    hx-indicator="#run-btn"
+                >
+                    <textarea id="code-editor" name="code" spellcheck="false" placeholder="-- This is a comment. Describe what you want to see!
+-- For example:
+
+Make a scene {
+  background: 'starry-night';
+}
+
+Create an element: 'cat' {
+  style: 'cartoonish',
+  wears: 'a tiny wizard hat',
+  position: 'center',
+  animation: 'float up and down slowly',
+}
+
+On interaction (click the cat) {
+  play sound: 'meow.mp3',
+  show text: 'Greetings, human!',
+}
+"></textarea>
+                    <button id="run-btn" type="submit">Run Code</button>
+                </form>
+            </div>
+            <div id="output-pane">
+                <div id="visual-output-container">
+                    <h3>Visual Output</h3>
+                    <div id="output-display" class="htmx-container">
+                        <div class="placeholder">Your visual creations will appear here...</div>
+                    </div>
+                </div>
+                <div id="log-output-container">
+                    <h3>Console Output</h3>
+                    <pre id="output-log" class="htmx-container"><div class="placeholder-log">Console output will appear here...</div></pre>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="importmap">
+    {
+      "imports": {
+        "marked": "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js"
+      }
+    }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
